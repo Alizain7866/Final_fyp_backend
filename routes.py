@@ -249,22 +249,46 @@ def list_uploaded_images():
 @routes.route("/get-final-image", methods=["GET"])
 @cross_origin(origins="http://localhost:3000", supports_credentials=True)
 def getimageoutput():
-    name = request.args.get("name")
-    final_image_path = f"final_stitched_output_{name}.jpg"
-    final_image_url = f"http://localhost:5000/static/{final_image_path}"
-
-
-
+    name = request.args.get("email")
+    name = name.split("@")
+    name = name[0]
+    print(name)
+    # Read the counter value from counter.txt
+    try:
+        with open("counter.txt", "r") as file:
+            counter = file.read().strip()
+    except Exception as e:
+        return jsonify({"error": f"Failed to read counter file: {str(e)}"}), 500
     
-   # Debugging
-    # Ensure the image is placed in the static directory to be accessible
+    final_image_path = f"final_stitched_output_{counter}_{name}.jpg"
+    final_image_url = f"http://localhost:5000/static/{final_image_path}"
+    
     return jsonify({"imageUrl": final_image_url})
+
 
 @routes.route("/download-final-image", methods=["GET"])
 @cross_origin(origins="http://localhost:3000")
 def download_final_image():
+    name = request.args.get("email")
+    if not name:
+        return jsonify({"error": "Email parameter is required"}), 400
+
+    name = name.split("@")[0]  # Extract name from email
+    print(name)
+
     try:
-        return send_file("static/final_stitched_output.jpg", as_attachment=True)
+        with open("counter.txt", "r") as file:
+            counter = file.read().strip()
+    except Exception as e:
+        return jsonify({"error": f"Failed to read counter file: {str(e)}"}), 500
+    
+    STATIC_FOLDER = os.path.join(os.getcwd(), "static")  # Get absolute path to static/
+
+    final_image_path = os.path.join(STATIC_FOLDER, f"final_stitched_output_{counter}_{name}.jpg")
+
+
+    try:
+        return send_file(final_image_path, as_attachment=True)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -280,7 +304,7 @@ def get_images():
         if not email:
             return jsonify({"error": "Email is required"}), 400
 
-        user = User.find_one({"email": email})
+        user = User.find_images({"email": email})
 
         if not user:
             return jsonify({"images": []})  # Return empty list if user is not found

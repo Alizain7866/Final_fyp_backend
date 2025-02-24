@@ -52,3 +52,9 @@ class User:
             {"email": email},  # Find user by email
             {"$push": {"stitched_images": stitched_image_path}}  # Append new image path
         )
+    @staticmethod
+    def find_images(query: dict):
+    # """Retrieve a user's stitched images from the database."""
+       user = mongo.db.users.find_one(query, {"stitched_images": 1, "_id": 0})  # Fetch only stitched_images
+       return user if user else None
+
