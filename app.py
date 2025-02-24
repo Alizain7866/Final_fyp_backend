@@ -3,6 +3,7 @@ from config import Config
 from flask_session import Session
 from config import Config
 from database.db import init_db
+from flask_mail import Mail, Message
 from routes import routes
 from flask import Flask, jsonify, request
 from flask_cors import CORS, cross_origin
@@ -26,7 +27,7 @@ Session(app)
 
 
 
-
+mail = Mail(app)
 
 #session
 
@@ -51,7 +52,8 @@ CORS(app, resources={r"/uploads": {"origins": "http://localhost:3000"},
                      r"/stitching": {"origins": "http://localhost:3000"},
                      r"/login": {"origins": "http://localhost:3000"},
                      r"/get-final-image": {"origins": "http://localhost:3000"},
-                     r"/download-final-image": {"origins": "http://localhost:3000"}
+                     r"/download-final-image": {"origins": "http://localhost:3000"},
+                     r"/send-email":{"origins":"http://localhost:3000"}
 
 
                      }, supports_credentials=True)   

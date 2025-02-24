@@ -12,3 +12,9 @@ class Config:
     SESSION_USE_SIGNER = True
     SESSION_FILE_DIR = "./flask_session_data"  # Directory for storing session files
     SECRET_KEY = "your_secret_key"  # Required for session security
+    MAIL_SERVER = 'smtp.gmail.com'  # Use your email provider's SMTP server
+    MAIL_PORT = 587
+    MAIL_USE_TLS = True
+    MAIL_USERNAME = 'oggyonfire@gmail.com'  # Change to your email
+    MAIL_PASSWORD = 'gecy kwpj tosm zydd'  # Use an App Password for Gmail
+    MAIL_DEFAULT_SENDER = 'oggyonfire@gmail.com'  # Sender email

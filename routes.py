@@ -2,6 +2,8 @@ from flask import Blueprint, request, jsonify, session,current_app, send_file, s
 from flask_cors import cross_origin
 from flask_bcrypt import Bcrypt
 from models import User
+from flask_mail import Mail, Message
+
 import random
 import os
 import shutil
@@ -12,7 +14,7 @@ user_static_dictionary = {}
 
 bcrypt = Bcrypt()
 routes = Blueprint("routes", __name__)
-
+mail = Mail()
 # UPLOAD_FOLDER = "uploads"
 # if not os.path.exists(UPLOAD_FOLDER):
 #     os.makedirs(UPLOAD_FOLDER)  # Create the uploads folder if it doesn't exist
@@ -313,3 +315,26 @@ def get_images():
 
     except Exception as e:
         return jsonify({"error": f"Internal Server Error: {str(e)}"}), 500
+    
+
+
+
+
+
+@routes.route('/send-email', methods=['POST'])
+def send_email():
+    data = request.get_json()
+    email = data.get('email')  # Get the email from frontend input
+    subject = data.get('subject', 'Default Subject')
+    message = data.get('message', 'Hello! This is a test email.')
+
+    if not email:
+        return jsonify({'error': 'Email address is required'}), 400
+
+    try:
+        msg = Message(subject, recipients=[email])
+        msg.body = message
+        mail.send(msg)
+        return jsonify({'message': f'Email sent successfully to {email}'}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
