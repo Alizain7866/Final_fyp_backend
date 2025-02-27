@@ -15,7 +15,10 @@ user_static_dictionary = {}
 bcrypt = Bcrypt()
 routes = Blueprint("routes", __name__)
 mail = Mail()
+STATIC_FOLDER = os.path.join(os.getcwd(), "static")  # Get absolute path to static/
+print(STATIC_FOLDER)
 # UPLOAD_FOLDER = "uploads"
+
 # if not os.path.exists(UPLOAD_FOLDER):
 #     os.makedirs(UPLOAD_FOLDER)  # Create the uploads folder if it doesn't exist
 
@@ -264,27 +267,37 @@ def list_uploaded_images():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-
-
-
 @routes.route("/get-final-image", methods=["GET"])
-@cross_origin(origins="http://localhost:3000", supports_credentials=True)
+@cross_origin(origins="http://localhost:3000")
 def getimageoutput():
     name = request.args.get("email")
-    name = name.split("@")
-    name = name[0]
-    print(name)
-    # Read the counter value from counter.txt
+    if not name:
+        return jsonify({"error": "Email is required"}), 400
+
+    name = name.split("@")[0]  # Extract the username
+    print(f"Processed username: {name}")
+
+    base_url = request.host_url  # Gets http://localhost:5000/
+
+    # Read the counter value
     try:
         with open("counter.txt", "r") as file:
             counter = file.read().strip()
     except Exception as e:
         return jsonify({"error": f"Failed to read counter file: {str(e)}"}), 500
-    
-    final_image_path = f"final_stitched_output_{counter}_{name}.jpg"
-    final_image_url = f"http://localhost:5000/static/{final_image_path}"
-    
+
+    final_image_name = f"final_stitched_output_{counter}_{name}.jpg"
+    final_image_path = os.path.join(current_app.static_folder, final_image_name)
+    print(f"Final image path: {final_image_path}")
+
+    if not os.path.exists(final_image_path):
+        return jsonify({"error": f"Image {final_image_name} not found"}), 404
+
+    final_image_url = f"{base_url}static/{final_image_name}"
+    print(f"Returning Image URL: {final_image_url}")  # Debugging
+
     return jsonify({"imageUrl": final_image_url})
+
 
 
 @routes.route("/download-final-image", methods=["GET"])
@@ -362,4 +375,5 @@ def send_email():
 
 @routes.route('/static/<filename>')
 def serve_image(filename):
-    return send_from_directory(current_app.config['UPLOAD_FOLDER'], filename)
+    current_app.config['STATIC_FOLDER'] = STATIC_FOLDER
+    return send_from_directory(current_app.config['STATIC_FOLDER'], filename)

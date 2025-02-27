@@ -8,7 +8,7 @@ from routes import routes
 from flask import Flask, jsonify, request
 from flask_cors import CORS, cross_origin
 import os
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static')
 # app.config["UPLOAD_FOLDER"] = os.path.join(os.getcwd(), "upload_folder")
 
 app.config.from_object(Config)  # Load configurations
