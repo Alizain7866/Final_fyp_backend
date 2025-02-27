@@ -354,6 +354,7 @@ def get_images():
 
 
 @routes.route('/send-email', methods=['POST'])
+@cross_origin(origins="http://localhost:3000")
 def send_email():
     data = request.get_json()
     email = data.get('email')  # Get the email from frontend input
@@ -377,3 +378,23 @@ def send_email():
 def serve_image(filename):
     current_app.config['STATIC_FOLDER'] = STATIC_FOLDER
     return send_from_directory(current_app.config['STATIC_FOLDER'], filename)
+
+
+
+@routes.route("/reset-password", methods=["POST"])
+@cross_origin(origins="http://localhost:3000")
+def reset_password():
+    data = request.json
+    email = data.get("email")
+    new_password = data.get("new_password")
+
+    if not email or not new_password:
+        return jsonify({"error": "Missing email or password"}), 400  # Return 400 if missing data
+
+    user = User.find_user_by_email(email)  # Find user in database
+
+    if user:  
+        User.update_from_email(email, new_password)  # Update password
+        return jsonify({"message": "Password updated successfully"}), 200
+    else:
+        return jsonify({"error": "User not found"}), 404  # Return 404 if user not found

@@ -1,4 +1,8 @@
 from database.db import mongo
+from flask_bcrypt import Bcrypt
+
+bcrypt = Bcrypt()  # Initialize Bcrypt for password hashing
+
 
 import random
 
@@ -59,3 +63,18 @@ class User:
        user = mongo.db.users.find_one(query, {"stitched_images": 1, "_id": 0})  # Fetch only stitched_images
        return user if user else None
 
+
+@staticmethod
+def update_from_email(email: str, new_password: str):
+    user = mongo.db.users.find_one({"email": email})  # Find user by email
+
+    if not user:
+        return {"error": "User not found"}, 404  # Return error if user not found
+
+    # Hash the new password before storing it
+    hashed_password = bcrypt.generate_password_hash(new_password).decode("utf-8")
+
+    # Update user's password in the database
+    mongo.db.users.update_one({"email": email}, {"$set": {"password": hashed_password}})
+
+    return {"message": "Password updated successfully"}, 200  # Return success message

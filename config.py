@@ -16,5 +16,5 @@ class Config:
     MAIL_PORT = 587
     MAIL_USE_TLS = True
     MAIL_USERNAME = 'oggyonfire@gmail.com'  # Change to your email
-    MAIL_PASSWORD = 'gecy kwpj tosm zydd'  # Use an App Password for Gmail
+    MAIL_PASSWORD = 'ishn bele izrl depd'  # Use an App Password for Gmail
     MAIL_DEFAULT_SENDER = 'oggyonfire@gmail.com'  # Sender email
