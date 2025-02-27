@@ -5,6 +5,7 @@ bcrypt = Bcrypt()  # Initialize Bcrypt for password hashing
 
 
 import random
+import os
 
 def generate_unique_user_id():
     """Generate a unique user_id between 1-100."""
@@ -78,3 +79,23 @@ def update_from_email(email: str, new_password: str):
     mongo.db.users.update_one({"email": email}, {"$set": {"password": hashed_password}})
 
     return {"message": "Password updated successfully"}, 200  # Return success message
+
+
+@staticmethod
+def remove_image(email: str, image_path: str):
+    user = mongo.db.users.find_one({"email": email})  # Find user by email
+
+    if not user:
+        return {"error": "User not found"}, 404  # Return error if user not found
+
+    # Remove the image file from the filesystem
+    if os.path.exists(image_path):
+        try:
+            os.remove(image_path)
+        except Exception as e:
+            return {"error": f"Failed to delete image: {str(e)}"}, 500
+
+    # Remove the image reference from the database
+    mongo.db.users.update_one({"email": email}, {"$unset": {"image_url": ""}})
+
+    return {"message": "Image deleted successfully"}, 200  # Return success message

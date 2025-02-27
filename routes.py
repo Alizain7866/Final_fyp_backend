@@ -398,3 +398,33 @@ def reset_password():
         return jsonify({"message": "Password updated successfully"}), 200
     else:
         return jsonify({"error": "User not found"}), 404  # Return 404 if user not found
+
+
+@routes.route("/delete-final-image", methods=["POST"])
+@cross_origin(origins="http://localhost:3000",headers=["Content-Type"])
+def delete_stitched_image():
+    email = request.args.get("email")
+    if not email:
+        return jsonify({"error": "Email parameter is required"}), 400
+
+    name = email.split("@")[0]  # Extract name from email
+
+    try:
+        with open("counter.txt", "r") as file:
+            counter = file.read().strip()
+    except Exception as e:
+        return jsonify({"error": f"Failed to read counter file: {str(e)}"}), 500
+
+    STATIC_FOLDER = os.path.join(os.getcwd(), "static")  # Get absolute path to static/
+    final_image_path = os.path.join(STATIC_FOLDER, f"final_stitched_output_{counter}_{name}.jpg")
+
+    user = User.find_user_by_email(email)
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    try:
+        # Call the remove_image method with the image path
+        User.remove_image(email, final_image_path)
+        return jsonify({"message": "Image deleted successfully"}), 200
+    except Exception as e:
+        return jsonify({"error": f"Failed to delete image: {str(e)}"}), 500
