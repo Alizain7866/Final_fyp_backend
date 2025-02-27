@@ -53,7 +53,8 @@ CORS(app, resources={r"/uploads": {"origins": "http://localhost:3000"},
                      r"/login": {"origins": "http://localhost:3000"},
                      r"/get-final-image": {"origins": "http://localhost:3000"},
                      r"/download-final-image": {"origins": "http://localhost:3000"},
-                     r"/send-email":{"origins":"http://localhost:3000"}
+                     r"/send-email":{"origins":"http://localhost:3000"},
+                     r"/register":{"origins":"htpp://localhost:3000"}
 
 
                      }, supports_credentials=True)   

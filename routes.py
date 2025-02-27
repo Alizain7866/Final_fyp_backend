@@ -40,9 +40,19 @@ ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
 
 
 @routes.route("/register", methods=["POST"])
-def register():
-    data = request.json
+@cross_origin(origins="http://localhost:3000")
 
+def register():
+    #   user = {
+    #         "user_id": user_id,
+    #         "name": name,
+    #         "email": email,
+    #         "phone-number":phone_number,
+    #         "password": hashed_password,  # Storing hashed password
+    #         "stitched_images": []  # Initially empty
+    #     }
+    data = request.json
+    print(data)
     if not data.get("email") or not data.get("password") or not data.get("name"):
         return jsonify({"error": "All fields (name, email, password) are required"}), 400
 
@@ -53,7 +63,9 @@ def register():
 
 
     hashed_password = bcrypt.generate_password_hash(data["password"]).decode("utf-8")
-    User.create_user(data["name"], data["email"], hashed_password)
+    # User.create_user(data["name"], data["email"],data["phone_number"], hashed_password)
+    User.create_user(data["name"], data["email"], hashed_password, data["phone_number"])
+
     
     return jsonify({"message": "User registered successfully"} ), 201
 
@@ -240,11 +252,18 @@ def upload_files():
 def list_uploaded_images():
     try:
         upload_folder = current_app.config["UPLOAD_FOLDER"]
-        
-        images = [{"name": filename} for filename in os.listdir(upload_folder) if filename.lower().endswith((".jpg", ".jpeg", ".png", ".gif"))]
+        base_url = request.host_url  # Gets http://localhost:5000/
+
+        images = [
+            {"name": filename, "url": f"{base_url}uploads/{filename}"}
+            for filename in os.listdir(upload_folder)
+            if filename.lower().endswith((".jpg", ".jpeg", ".png", ".gif"))
+        ]
+
         return jsonify({"images": images}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 
 
 
@@ -338,3 +357,9 @@ def send_email():
         return jsonify({'message': f'Email sent successfully to {email}'}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+
+
+@routes.route('/static/<filename>')
+def serve_image(filename):
+    return send_from_directory(current_app.config['UPLOAD_FOLDER'], filename)

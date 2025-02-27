@@ -19,12 +19,13 @@ class User:
     """
     
     @staticmethod
-    def create_user( name: str, email: str, hashed_password: str):
+    def create_user( name: str, email: str, hashed_password: str, phone_number:str):
         user_id = generate_unique_user_id()
         user = {
             "user_id": user_id,
             "name": name,
             "email": email,
+            "phone_number":phone_number,
             "password": hashed_password,  # Storing hashed password
             "stitched_images": []  # Initially empty
         }
