@@ -165,56 +165,51 @@ def get_user_images():
 
 
 
-import asyncio
 @routes.route("/stitching", methods=["POST"])
-async def upload_images():
+@cross_origin(origins="http://localhost:3000")
+def upload_images():
     """Endpoint to upload images."""
     print("Reached here I have")
-
+    
     # Get JSON data from request
-    data = await request.get_json()
+    data = request.json
     email = data.get("email")
-
+    
     if not email:
         return jsonify({"error": "Email is required"}), 400
 
     user = User.find_user_by_email(email)
+    
     if not user:
         return jsonify({"error": "User not found"}), 404
-
-    email2 = email.split("@")[0]
-
-    # Access the app's configuration
+    
+    email1 = email.split("@")
+    email2 = email1[0]  # Corrected email extraction
+    
+    # Access the app's configuration using current_app
     upload_folder = current_app.config["UPLOAD_FOLDER"]
+    
+    # Ensure the folder exists
     if not os.path.exists(upload_folder):
         os.makedirs(upload_folder)
 
-    # Execute the Python script asynchronously
-    process = await asyncio.create_subprocess_exec(
-        "python", "count_images.py", email2,
-        stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.PIPE
-    )
-    stdout, stderr = await process.communicate()
-
-    if process.returncode != 0:
-        return jsonify({"error": stderr.decode()}), 500
-
-    stitched_image_path = stdout.decode().strip()
+    # Execute the Python script to count images
+    result = subprocess.run(["python", "count_images.py", email2], check=True, text=True, capture_output=True)
+    
+    stitched_image_path = result.stdout.strip()
     print(stitched_image_path)
 
-    # Clean up upload folder
+    # Ensure the folder is emptied after processing
     if os.listdir(upload_folder):
         shutil.rmtree(upload_folder)
         os.makedirs(upload_folder)
 
-    # Update user's stitched image path
-    User.update_user_images(email, stitched_image_path)
+    # Update user record in the database
+    User.update_user_images(email, stitched_image_path)  # Correct update method
 
-    return jsonify({
-        "message": "Images uploaded and processed successfully.",
-        "stitched_image": stitched_image_path
-    }), 200
+
+    return jsonify({"message": "Images uploaded and processed successfully.", "stitched_image": stitched_image_path}), 200
+
 
 def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS

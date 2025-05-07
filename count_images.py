@@ -349,7 +349,6 @@ counter = Counter()
 def stitch_images(img1, img2, technique):
     # clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
     # Convert to grayscale
-    print("Statjkjfkdasjf")
     gray1 = cv2.cvtColor(img1, cv2.COLOR_BGR2GRAY)
     gray2 = cv2.cvtColor(img2, cv2.COLOR_BGR2GRAY)
 
