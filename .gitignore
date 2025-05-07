@@ -1,6 +1,6 @@
 .env
 config.py
 
-venv/
+venv/Lib/*
 __pycache__/
 database
